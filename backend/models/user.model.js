@@ -1,38 +1,62 @@
-const { Sequelize, DataTypes } = require("sequelize");
-require('dotenv').config();
-const sequelize = new Sequelize(
- process.env.DB_NAME,
- process.env.DB_USER,
- process.env.DB_PASS,
-  {
-    host: process.env.DB_HOST,
-    dialect: 'mysql'
-  }
-);
+/**
+ * Model class for "user"
+ *
+ * @author Vedanivas
+ *
+ * @param {Sequelize} sequelize - sequelize object
+ * @param {Sequelize.DataTypes} DataTypes - sequelize datatypes
+ *
+ * @returns User - sequelize model for user entity
+ */
 
-sequelize.authenticate().then(() => {
-   console.log('Connection has been established successfully.');
-}).catch((error) => {
-   console.error('Unable to connect to the database: ', error);
-});
-
-const User = sequelize.define("users", {
+export default (sequelize, DataTypes) => {
+  const User = sequelize.define('User', {
+    phone_number: {
+      type: DataTypes.STRING,
+      unique: true,
+      primaryKey: true,
+      allowNull: false,
+      validate: {
+        len: [10]  
+      }
+    },
     email: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
+      unique: true,
+      validate: {
+        isEmail: true 
+      }
+    },
+    age: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      validate: {
+        min: 8 
+      }
     },
     password: {
       type: DataTypes.STRING,
       allowNull: false
     },
-    number: {
-      type: DataTypes.DATEONLY,
+    fname: {
+      type: DataTypes.STRING,
+      allowNull: false
     },
- });
- 
-sequelize.sync().then(() => {
-console.log('Users table created successfully!');
-}).catch((error) => {
-console.error('Unable to create table : ', error);
-});
- 
+    lname: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    gender: {
+      type: DataTypes.ENUM,
+      values: ['Male', 'Female', 'Other'],
+    },
+    createdAt: DataTypes.DATE,
+    updatedAt: DataTypes.DATE,
+  }, {
+    tableName: 'users',
+    underscored: true,
+  });
+
+  return User;
+};
