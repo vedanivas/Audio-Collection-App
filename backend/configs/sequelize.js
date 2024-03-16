@@ -11,7 +11,7 @@ const sequelize = new Sequelize(
   {
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
-    dialect: 'mysql',
+    dialect: process.env.DIALECT,
     logging: false,
     isolationLevel: Transaction.ISOLATION_LEVELS.READ_COMMITTED,
   },
