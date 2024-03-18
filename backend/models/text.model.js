@@ -20,8 +20,16 @@ export default (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false
       },
+      recorded: {
+        type: DataTypes.TINYINT,
+        allowNull: true,
+        defaultValue: 0
+      },
+      user: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
       createdAt: DataTypes.DATE,
-      updatedAt: DataTypes.DATE,
     }, {
       tableName: 'texts',
       underscored: true,
