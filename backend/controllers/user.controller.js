@@ -70,7 +70,7 @@ const login = async (req, res) => {
         throw new NotFoundError('Token not generated');
     }
 
-    res.status(httpStatus.OK).send(responseHandler({ 'token': token }));
+    res.status(httpStatus.OK).send(responseHandler({ 'token': token, 'user': true }));
 };
 
 /**
