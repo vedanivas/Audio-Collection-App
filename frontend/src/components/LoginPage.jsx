@@ -49,31 +49,37 @@ export default function SignIn() {
     const password = data.get("password");
 
     try {
-      const response = await fetch("http://localhost:5050/api/login", {
+      const response = await fetch("http://localhost:5050/api/users/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-
+    
       if (!response.ok) {
         throw new Error("Invalid credentials or user not found.");
       }
-
+    
       const result = await response.json();
-      if (result.role) {
-        if (result.role === "admin") {
-          navigate("/admin-dashboard");
-        } else {
-          navigate("/user-dashboard");
-        }
+      console.log(result);
+      if (result.body.token) {
+        // Set the token in the Authorization header for subsequent requests
+        const token = result.body.token;
+        const headers = {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        };
+        navigate('/user-dashboard');
+
+      window.localStorage.setItem("token", token);
       } else {
-        // No role found in response, handle as needed
-        setError("No role found for user.");
+        // No token found in response, handle as needed
+        setError("No token found in response.");
       }
     } catch (error) {
       console.error("Error during login:", error);
       setError(error.message || "An unexpected error occurred.");
     }
+    
   };
 
   return (

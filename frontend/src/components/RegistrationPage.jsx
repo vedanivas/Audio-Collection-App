@@ -19,29 +19,17 @@ import Alert from "@mui/material/Alert";
 
 const defaultTheme = createTheme();
 
-// Helper function to validate email
-const validateEmail = (email) => {
-  const re =
-    /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-  return re.test(String(email).toLowerCase());
-};
-
 export default function SignUp() {
   const [errorMessage, setErrorMessage] = React.useState("");
+  const [phone, setPhone] = React.useState("");
+  const [email, setEmail] = React.useState("");
+  const [age, setAge] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
-  const [role, setRole] = React.useState("");
-  const [firstName, setFirstName] = React.useState("");
-  const [lastName, setLastName] = React.useState("");
-  const [email, setEmail] = React.useState("");
-  const [isEmailValid, setIsEmailValid] = React.useState(true);
+  const [fname, setFname] = React.useState("");
+  const [lname, setLname] = React.useState("");
+  const [gender, setGender] = React.useState("");
   const navigate = useNavigate();
-
-  const handleEmailChange = (e) => {
-    const emailInput = e.target.value;
-    setEmail(emailInput);
-    setIsEmailValid(validateEmail(emailInput));
-  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -49,52 +37,45 @@ export default function SignUp() {
 
     // Form data to be sent to the backend
     const formData = {
-      role: data.get("role"),
-      firstName: data.get("firstName"),
-      lastName: data.get("lastName"),
+      phone: data.get("phone"),
       email: data.get("email"),
+      age: data.get("age"),
       password: data.get("password"),
+      fname: data.get("fname"),
+      lname: data.get("lname"),
+      gender: data.get("gender"),
     };
 
+    // Make the request to register the user
     try {
-      const response = await fetch("http://localhost:5050/api/register", {
+      const response = await fetch("http://localhost:5050/api/users/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
 
       if (!response.ok) {
-        const result = await response.json();
-        if (result.error === "User exists") {
-          throw new Error(
-            "An account already exists with the provided email. Please try logging in."
-          );
-        }
         throw new Error("An error occurred during registration.");
       }
 
       // Handle successful registration
-      const result = await response.json();
-      if (result.role === "admin") {
-        navigate("/admin-dashboard");
-      } else {
-        navigate("/user-dashboard");
-      }
+      navigate("/login");
     } catch (error) {
       setErrorMessage(error.message);
     }
   };
 
   const isFormFilled =
-    firstName &&
-    lastName &&
+    phone &&
     email &&
-    role &&
+    age &&
     password &&
     confirmPassword &&
-    isEmailValid;
+    fname &&
+    lname &&
+    gender;
   const passwordsMatch = password === confirmPassword;
-  const isSubmitDisabled = !isFormFilled || !passwordsMatch || !isEmailValid;
+  const isSubmitDisabled = !isFormFilled || !passwordsMatch;
 
   return (
     <Grid container justifyContent="center">
@@ -128,43 +109,14 @@ export default function SignUp() {
             >
               <Grid container spacing={2}>
                 <Grid item xs={12}>
-                  <FormControl fullWidth>
-                    <InputLabel id="role-select-label">Role</InputLabel>
-                    <Select
-                      labelId="role-select-label"
-                      id="role"
-                      name="role"
-                      required
-                      label="Role"
-                      onChange={(e) => setRole(e.target.value)}
-                      defaultValue=""
-                    >
-                      <MenuItem value="user">User</MenuItem>
-                      <MenuItem value="admin">Admin</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    autoComplete="given-name"
-                    name="firstName"
-                    required
-                    fullWidth
-                    id="firstName"
-                    label="First Name"
-                    autoFocus
-                    onChange={(e) => setFirstName(e.target.value)}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
                   <TextField
                     required
                     fullWidth
-                    id="lastName"
-                    label="Last Name"
-                    name="lastName"
-                    autoComplete="family-name"
-                    onChange={(e) => setLastName(e.target.value)}
+                    id="phone"
+                    label="Phone Number"
+                    name="phone"
+                    autoComplete="tel"
+                    onChange={(e) => setPhone(e.target.value)}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -175,24 +127,28 @@ export default function SignUp() {
                     label="Email Address"
                     name="email"
                     autoComplete="email"
-                    onChange={handleEmailChange}
-                    error={!isEmailValid}
-                    helperText={
-                      !isEmailValid && "Please enter a valid email address."
-                    }
-                    sx={{ borderColor: !isEmailValid ? "red" : "inherit" }}
+                    onChange={(e) => setEmail(e.target.value)}
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <TextField
                     required
                     fullWidth
-                    name="password"
-                    label="Password"
-                    type="password"
+                    id="age"
+                    label="Age"
+                    name="age"
+                    type="number"
+                    onChange={(e) => setAge(e.target.value)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    required
+                    fullWidth
                     id="password"
-                    autoComplete="new-password"
-                    value={password}
+                    label="Password"
+                    name="password"
+                    type="password"
                     onChange={(e) => setPassword(e.target.value)}
                   />
                 </Grid>
@@ -200,19 +156,49 @@ export default function SignUp() {
                   <TextField
                     required
                     fullWidth
-                    name="confirmPassword"
-                    label="Confirm Password"
-                    type="password"
                     id="confirmPassword"
-                    value={confirmPassword}
+                    label="Confirm Password"
+                    name="confirmPassword"
+                    type="password"
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    error={!passwordsMatch && confirmPassword.length > 0}
-                    helperText={
-                      !passwordsMatch && confirmPassword.length > 0
-                        ? "Passwords do not match"
-                        : ""
-                    }
                   />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    required
+                    fullWidth
+                    id="fname"
+                    label="First Name"
+                    name="fname"
+                    onChange={(e) => setFname(e.target.value)}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    required
+                    fullWidth
+                    id="lname"
+                    label="Last Name"
+                    name="lname"
+                    onChange={(e) => setLname(e.target.value)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <FormControl fullWidth>
+                    <InputLabel id="gender-select-label">Gender</InputLabel>
+                    <Select
+                      labelId="gender-select-label"
+                      id="gender"
+                      name="gender"
+                      required
+                      label="Gender"
+                      onChange={(e) => setGender(e.target.value)}
+                    >
+                      <MenuItem value="Male">Male</MenuItem>
+                      <MenuItem value="Female">Female</MenuItem>
+                      <MenuItem value="Other">Other</MenuItem>
+                    </Select>
+                  </FormControl>
                 </Grid>
               </Grid>
               <Button
