@@ -58,5 +58,7 @@ export default (sequelize, DataTypes) => {
     underscored: true,
   });
 
+  User.sync().then(() => console.log('User table created/exists'))
+  
   return User;
 };

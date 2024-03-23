@@ -28,15 +28,21 @@ export default (sequelize, DataTypes) => {
       user: {
         type: DataTypes.STRING,
         allowNull: true,
+        validate: {
+          len: [10]  
+        }
       },
       createdAt: DataTypes.DATE,
+      updatedAt: DataTypes.DATE,
     }, {
       tableName: 'texts',
       underscored: true,
       charset: 'utf8',
       collate: 'utf8_unicode_ci',
     });
-  
+    
+    Text.sync().then(() => console.log('Text table created/exists'))
+
     return Text;
   };
   
