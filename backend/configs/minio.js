@@ -27,6 +27,7 @@ try {
     console.log(`Bucket ${bucketName} already exists.`);
   }
 } catch (error) {
+  console.error("Error connecting to minio")
   throw error;
 }
 

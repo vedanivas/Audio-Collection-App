@@ -62,7 +62,7 @@ const uploadFile = async (req, res) => {
 
         const rows = []
         lines.forEach((line) => rows.push({ text: line }));
-
+        
         await updateTexts(rows);
         // if (response.status === 'fail') {
         //     res.status(httpStatus.INTERNAL_SERVER_ERROR).send(responseHandler(response.message));
