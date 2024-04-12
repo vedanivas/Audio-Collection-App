@@ -17,11 +17,11 @@ server.use(
     })
 );
 
-// const corsOptions = {
-//     origin: 'http://localhost:5050/',
-//     exposedHeaders: 'authorization'
-// }
-// server.use(cors(corsOptions));
+const corsOptions = {
+    origin: 'http://localhost:5173',
+    exposedHeaders: 'authorization'
+}
+server.use(cors(corsOptions));
 server.use(cors());
 server.options('*', cors());
   

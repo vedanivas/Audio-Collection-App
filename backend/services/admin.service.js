@@ -31,7 +31,7 @@ const uploadTextFileToMinio = async filePath => {
     // const metaData = {
     //     'Content-Type': 'text/plain',
     // }
-    minioClient.fPutObject('texts', name, filePath, function (err, objInfo) {
+    minioClient.fPutObject('texts', name, filePath, (err, objInfo) => {
         if (err) {
             console.log(err);
             return { status: 'fail', message: err };

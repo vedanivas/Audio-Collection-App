@@ -48,10 +48,10 @@ const uploadFile = async (req, res) => {
     // const filePath = req.file;
     
     const filePath = '/Users/vedanivaschowdary/Academics/Sem_6/BTPI/sample.txt'
-    // const response = uploadTextFileToMinio(filePath);
-    // if (response.status === 'fail') {
-    //     res.status(httpStatus.INTERNAL_SERVER_ERROR).send(responseHandler(response.message));
-    // }
+    const response = uploadTextFileToMinio(filePath);
+    if (response.status === 'fail') {
+        res.status(httpStatus.INTERNAL_SERVER_ERROR).send(responseHandler(response.message));
+    }
 
     fs.readFile(filePath, 'utf8', async (err, data) => {
         if (err) {
@@ -59,7 +59,7 @@ const uploadFile = async (req, res) => {
         }
 
         const lines = data.split('\n');
-
+        
         const rows = []
         lines.forEach((line) => rows.push({ text: line }));
         
@@ -69,7 +69,6 @@ const uploadFile = async (req, res) => {
         // }
         res.status(httpStatus.OK).send(responseHandler('File uploaded and texts updated successfully'));
     })
-
 }
 
 export {

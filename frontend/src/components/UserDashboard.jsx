@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { CircularProgress, Typography, Button } from '@mui/material';
 import AudioRecorder from './AudioRecorder'; 
+import Root from '../url';
 
 function UserDashboard() {
   const [sentences, setSentences] = useState([]);
@@ -8,12 +9,20 @@ function UserDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const root = Root();
+
   useEffect(() => {
     fetchSentences();
   }, []);
 
   const fetchSentences = () => {
-    fetch('http://localhost:5050/api/sentences')
+    fetch(root + 'users/fetchSentences', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      }
+    })
       .then(response => {
         if (!response.ok) {
           throw new Error('Failed to fetch sentences');
@@ -21,7 +30,7 @@ function UserDashboard() {
         return response.json();
       })
       .then(data => {
-        setSentences(data);
+        setSentences(data.body);
         setLoading(false);
       })
       .catch(error => {
@@ -49,7 +58,7 @@ function UserDashboard() {
       {sentences.length > 0 ? (
         <div>
           <Typography variant="body1" style={{ marginTop: '1rem' }}>
-            {sentences[currentSentenceIndex].sentence}
+            {sentences[currentSentenceIndex]}
           </Typography>
           <AudioRecorder />
           <Button
