@@ -16,8 +16,10 @@ import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import Alert from "@mui/material/Alert";
+import url from "../url"
 
 const defaultTheme = createTheme();
+const ROOT = url()
 
 export default function SignUp() {
   const [errorMessage, setErrorMessage] = React.useState("");
@@ -37,7 +39,7 @@ export default function SignUp() {
 
     // Form data to be sent to the backend
     const formData = {
-      phone: data.get("phone"),
+      phone_number: data.get("phone"),
       email: data.get("email"),
       age: data.get("age"),
       password: data.get("password"),
@@ -48,7 +50,7 @@ export default function SignUp() {
 
     // Make the request to register the user
     try {
-      const response = await fetch("http://localhost:5050/api/users/register", {
+      const response = await fetch(ROOT + "users/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -192,6 +194,7 @@ export default function SignUp() {
                       name="gender"
                       required
                       label="Gender"
+                      value={gender}
                       onChange={(e) => setGender(e.target.value)}
                     >
                       <MenuItem value="Male">Male</MenuItem>
