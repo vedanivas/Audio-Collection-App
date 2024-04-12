@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
@@ -64,13 +64,9 @@ export default function SignIn() {
       if (result.body.token) {
         // Set the token in the Authorization header for subsequent requests
         const token = result.body.token;
-        const headers = {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        };
+        
+        window.localStorage.setItem("token", token);
         navigate('/user-dashboard');
-
-      window.localStorage.setItem("token", token);
       } else {
         // No token found in response, handle as needed
         setError("No token found in response.");

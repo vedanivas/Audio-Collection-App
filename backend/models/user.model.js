@@ -51,6 +51,10 @@ export default (sequelize, DataTypes) => {
       type: DataTypes.ENUM,
       values: ['Male', 'Female', 'Other'],
     },
+    admin : {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    },
     createdAt: DataTypes.DATE,
     updatedAt: DataTypes.DATE,
   }, {

@@ -1,5 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Button, Typography } from '@mui/material';
+import url from '../url';
+
+const Root = url();
 
 function UploadForm() {
   const [file, setFile] = useState(null);
@@ -19,9 +22,12 @@ function UploadForm() {
     formData.append('file', file);
 
     try {
-      const response = await fetch('http://localhost:5050/api/upload', {
+      const response = await fetch(Root + 'admin/upload', {
         method: 'POST',
         body: formData,
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
       });
 
       if (!response.ok) {
@@ -36,14 +42,12 @@ function UploadForm() {
       setErrorMessage('Error uploading file. Please try again.');
     }
   };
-
   return (
     <div>
       <input
         type="file"
-        accept=".txt"
         onChange={handleFileChange}
-        style={{ display: 'none' }} // Hide the default input style
+        style={{ display: 'none' }}
         id="file-upload-input"
       />
       <label htmlFor="file-upload-input">

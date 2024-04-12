@@ -7,6 +7,8 @@
 import db from '../models/index.js';
 import minioClient from '../configs/minio.js';
 
+import bufferToStream from '../utils/streamifier.js';
+
 /**
  * @constant {Sequelize.models} - User model is extracted
  */
@@ -26,19 +28,20 @@ const findAll = async () => User.findAll();
  * @param {object} file - file object to be uploaded
  * @returns {string} - presigned url of uploaded file
  */
-const uploadTextFileToMinio = async filePath => {
-    const name = filePath.split('/').pop();
-    // const metaData = {
-    //     'Content-Type': 'text/plain',
-    // }
-    minioClient.fPutObject('texts', name, filePath, (err, objInfo) => {
-        if (err) {
-            console.log(err);
-            return { status: 'fail', message: err };
-        }
+const uploadTextFileToMinio = async file => {
+    const name = file.originalname
+    const fileSize = file.size
+    const stream = await bufferToStream(file.buffer)
 
-        return { status: 'success', message: objInfo };
-    });
+    return new Promise((resolve, reject) => {
+        minioClient.putObject('texts', name, stream, fileSize, (err, objInfo) => {
+            if (err) {
+                console.log(err)
+                reject({ status: 'fail', message: err })
+            }
+            resolve({ status: 'success', message: objInfo })
+        })
+    })
 }
 
 /**

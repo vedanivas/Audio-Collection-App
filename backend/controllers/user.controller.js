@@ -6,6 +6,7 @@
 import ffmpegPath from '@ffmpeg-installer/ffmpeg'
 import ffmpeg from 'fluent-ffmpeg'
 import httpStatus from 'http-status'
+import bcrypt from 'bcryptjs'
 
 import * as errors from '../utils/api-error.js'
 import * as response from '../middlewares/response-handler.js'
@@ -32,8 +33,14 @@ const responseHandler = response.default;
  * @param {*} res - express HTTP response object
  */
 const addUser = async (req, res) => {
-    const userDetails = await create(req.body);
-    res.status(httpStatus.CREATED).send(responseHandler(userDetails));
+    console.log(req.body)
+    const details = req.body
+    const salt = await bcrypt.genSalt(10)
+    details.password = await bcrypt.hash(details.password, salt)
+    details.admin = false
+    console.log(details)
+    const userDetails = await create(details)
+    res.status(httpStatus.CREATED).send(responseHandler(userDetails))
 };
 
 /**
@@ -47,25 +54,24 @@ const addUser = async (req, res) => {
  * @throws {NotFoundError} - if no such user exists for provided userId
  */
 const login = async (req, res) => {
-    const { email, password } = req.body;
-    
-    const user = await findByMail(email);
+    const { email, password } = req.body
+
+    const user = await findByMail(email)
     
     if (!user) {
-      throw new NotFoundError('Invalid email or password. Please try again.');
+      throw new NotFoundError('Invalid email or password. Please try again.')
     }
-    
-    // const check = await bcrypt.compare(password, user.password);
-    const check = true;
+
+    const check = await bcrypt.compare(password, user.password)
 
     if (!check) {
-        throw new NotFoundError('Invalid email or password. Please try again.');
+        throw new NotFoundError('Invalid email or password. Please try again.')
     }
 
     const payload = {
         user: {
           id: user.email,
-          user: true,
+          admin: user.admin,
         },
     };
       
@@ -74,7 +80,7 @@ const login = async (req, res) => {
         throw new NotFoundError('Token not generated');
     }
 
-    res.status(httpStatus.OK).send(responseHandler({ 'token': token, 'user': true }));
+    res.status(httpStatus.OK).send(responseHandler({ 'token': token, 'admin': user.admin }));
 };
 
 /**
