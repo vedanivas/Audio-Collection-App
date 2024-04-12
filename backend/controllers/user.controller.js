@@ -3,13 +3,17 @@
  *
  * @author Vedanivas
  */
-import httpStatus from 'http-status';
+import ffmpegPath from '@ffmpeg-installer/ffmpeg'
+import ffmpeg from 'fluent-ffmpeg'
+import httpStatus from 'http-status'
 
-import * as errors from '../utils/api-error.js';
-import * as response from '../middlewares/response-handler.js';
-import { findByMail, create, uploadToMinio } from '../services/user.service.js';
+import * as errors from '../utils/api-error.js'
+import * as response from '../middlewares/response-handler.js'
+import { findByMail, create, uploadToMinio, collectSents } from '../services/user.service.js'
 
-import { generateAccessToken } from '../utils/authentication.js';
+import { generateAccessToken } from '../utils/authentication.js'
+
+ffmpeg.setFfmpegPath(ffmpegPath.path);
 
 /**
  * @constant {NotFoundError} NotFoundError - not found error object
@@ -81,15 +85,41 @@ const login = async (req, res) => {
  * @param {*} req - express HTTP request object
  * @param {*} res - express HTTP response object
  */
-const upload = async (req, res) => {
-    const file = req.file;
-    const response = await uploadToMinio(file);
+const uploadAudio = async (req, res) => {
+    const filePath = req.file.path;
+    const file = {
+        path: `uploads/${req.file.filename}.wav`,
+        originalname: req.file.originalname,
+        fileName: req.file.filename,
+    }
+    
+    ffmpeg(filePath)
+    .toFormat('wav')
+    .on('error', (err) => {
+      console.error('An error occurred: ' + err.message);
+      return res.sendStatus(500);
+    })
+    .on('end', () => uploadToMinio(file))
+    .save(file.path);
     
     res.status(httpStatus.OK).send(responseHandler({ 'message': 'File uploaded successfully' }));
+}
+
+/**
+ * Function which provides functionality
+ * to get all the sentences
+ * 
+ * @param {*} req - express HTTP request object
+ * @param {*} res - express HTTP response object
+ */
+const getSentences = async (req, res) => {
+    const sents = await collectSents()
+    res.status(httpStatus.OK).send(responseHandler(sents))
 }
 
 export {
     addUser,
     login,
-    upload,
+    uploadAudio,
+    getSentences,
 };
