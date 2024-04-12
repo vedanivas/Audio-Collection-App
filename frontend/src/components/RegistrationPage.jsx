@@ -12,8 +12,11 @@ import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
-import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
+import Radio from '@mui/material/Radio';
+import RadioGroup from '@mui/material/RadioGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import FormControl from '@mui/material/FormControl';
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import Alert from "@mui/material/Alert";
 import url from "../url"
@@ -31,12 +34,13 @@ export default function SignUp() {
   const [fname, setFname] = React.useState("");
   const [lname, setLname] = React.useState("");
   const [gender, setGender] = React.useState("");
+  const [user, setUser] = React.useState("user");
   const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-
+    const admin = user === "admin" ? true : false;
     // Form data to be sent to the backend
     const formData = {
       phone_number: data.get("phone"),
@@ -46,6 +50,7 @@ export default function SignUp() {
       fname: data.get("fname"),
       lname: data.get("lname"),
       gender: data.get("gender"),
+      admin: admin,
     };
 
     // Make the request to register the user
@@ -185,7 +190,21 @@ export default function SignUp() {
                     onChange={(e) => setLname(e.target.value)}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={12} sm={6}>
+                  <FormControl>
+                    <RadioGroup
+                      row
+                      aria-labelledby="demo-row-radio-buttons-group-label"
+                      name="row-radio-buttons-group"
+                      value={user}
+                      onChange={(e) => setUser(e.target.value)}
+                    >
+                      <FormControlLabel value="user" control={<Radio />} label="User" />
+                      <FormControlLabel value="admin" control={<Radio />} label="Admin" />
+                    </RadioGroup>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={6}>
                   <FormControl fullWidth>
                     <InputLabel id="gender-select-label">Gender</InputLabel>
                     <Select
