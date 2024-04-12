@@ -1,4 +1,3 @@
-import React from 'react';
 import UploadForm from './UploadForm';
 import DownloadForm from './DownloadForm';
 import { Typography, Paper } from '@mui/material';

@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CircularProgress, Typography, Button } from '@mui/material';
 import AudioRecorder from './AudioRecorder'; 
-import Root from '../url';
+import url from '../url';
 
 function UserDashboard() {
   const [sentences, setSentences] = useState([]);
@@ -9,14 +9,14 @@ function UserDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const root = Root();
+  const ROOT = url();
 
   useEffect(() => {
     fetchSentences();
   }, []);
 
   const fetchSentences = () => {
-    fetch(root + 'users/fetchSentences', {
+    fetch(ROOT + 'users/fetchSentences', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
