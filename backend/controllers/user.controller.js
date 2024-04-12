@@ -33,12 +33,9 @@ const responseHandler = response.default;
  * @param {*} res - express HTTP response object
  */
 const addUser = async (req, res) => {
-    console.log(req.body)
     const details = req.body
-    const salt = await bcrypt.genSalt(10)
+    const salt = await bcrypt.genSalt(process.env.SALT_ROUNDS)
     details.password = await bcrypt.hash(details.password, salt)
-    details.admin = false
-    console.log(details)
     const userDetails = await create(details)
     res.status(httpStatus.CREATED).send(responseHandler(userDetails))
 };
