@@ -45,30 +45,25 @@ const getAllUsers = async (req, res) => {
  * @param {*} res - express HTTP response object
  */
 const uploadFile = async (req, res) => {
-    // const filePath = req.file;
-    
-    const filePath = '/Users/vedanivaschowdary/Academics/Sem_6/BTPI/sample.txt'
-    const response = uploadTextFileToMinio(filePath);
+    const file = req.file
+
+    const response = await uploadTextFileToMinio(file)
+
     if (response.status === 'fail') {
-        res.status(httpStatus.INTERNAL_SERVER_ERROR).send(responseHandler(response.message));
+        res.status(httpStatus.INTERNAL_SERVER_ERROR).send(responseHandler(response.message))
     }
 
-    fs.readFile(filePath, 'utf8', async (err, data) => {
-        if (err) {
-            res.status(httpStatus.INTERNAL_SERVER_ERROR).send(responseHandler('Error reading file'));
-        }
+    const lines = file.buffer.toString('utf8').split('\n')
 
-        const lines = data.split('\n');
-        
-        const rows = []
-        lines.forEach((line) => rows.push({ text: line }));
-        
-        await updateTexts(rows);
-        // if (response.status === 'fail') {
-        //     res.status(httpStatus.INTERNAL_SERVER_ERROR).send(responseHandler(response.message));
-        // }
-        res.status(httpStatus.OK).send(responseHandler('File uploaded and texts updated successfully'));
-    })
+    const rows = []
+    lines.forEach((line) => rows.push({ text: line }))
+
+    try {
+        await updateTexts(rows)
+        res.status(httpStatus.OK).send(responseHandler('File uploaded and texts updated successfully'))
+    } catch (error) {
+        res.status(httpStatus.INTERNAL_SERVER_ERROR).send(responseHandler(error.message))
+    }
 }
 
 export {
