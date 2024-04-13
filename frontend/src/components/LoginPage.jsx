@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
@@ -14,21 +14,28 @@ import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import Alert from "@mui/material/Alert";
+import { useAuth } from "../contexts/AuthContext";
 
 const defaultTheme = createTheme();
 
-// Helper function to validate email
 const validateEmail = (email) => {
   const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   return re.test(String(email).toLowerCase());
 };
 
 export default function SignIn() {
+  const { isLoggedIn, login } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isEmailValid, setIsEmailValid] = useState(true);
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      navigate("/user-dashboard");
+    }
+  }, [isLoggedIn, navigate]);
 
   const handleEmailChange = (e) => {
     const emailInput = e.target.value;
@@ -44,38 +51,14 @@ export default function SignIn() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    const email = data.get("email");
-    const password = data.get("password");
-
     try {
-      const response = await fetch("http://localhost:5050/api/users/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-    
-      if (!response.ok) {
-        throw new Error("Invalid credentials or user not found.");
-      }
-    
-      const result = await response.json();
-      console.log(result);
-      if (result.body.token) {
-        // Set the token in the Authorization header for subsequent requests
-        const token = result.body.token;
-        
-        window.localStorage.setItem("token", token);
-        navigate('/user-dashboard');
-      } else {
-        // No token found in response, handle as needed
-        setError("No token found in response.");
-      }
+      await login(email, password);
     } catch (error) {
-      console.error("Error during login:", error);
-      setError(error.message || "An unexpected error occurred.");
+      console.error("Login error:", error.message);
+      setError(
+        error.message || "Failed to login. Please check your credentials."
+      );
     }
-    
   };
 
   return (

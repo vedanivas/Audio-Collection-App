@@ -29,12 +29,18 @@ const findAll = async () => User.findAll();
  * @returns {string} - presigned url of uploaded file
  */
 const uploadTextFileToMinio = async file => {
+    const bucketName = 'texts';
     const name = file.originalname
     const fileSize = file.size
     const stream = await bufferToStream(file.buffer)
 
+    const bucketExists = await minioClient.bucketExists(bucketName);
+    if (!bucketExists) {
+        await minioClient.makeBucket(bucketName, 'us-east-1');
+    }
+
     return new Promise((resolve, reject) => {
-        minioClient.putObject('texts', name, stream, fileSize, (err, objInfo) => {
+        minioClient.putObject(bucketName, name, stream, fileSize, (err, objInfo) => {
             if (err) {
                 console.log(err)
                 reject({ status: 'fail', message: err })
