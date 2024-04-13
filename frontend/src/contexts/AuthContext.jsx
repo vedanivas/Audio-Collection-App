@@ -4,6 +4,7 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [authToken, setAuthToken] = useState(localStorage.getItem('token'));
+  const [userRole, setUserRole] = useState(localStorage.getItem('role'));
   const isLoggedIn = !!authToken;
   const login = async (email, password) => {
     try {
@@ -14,31 +15,35 @@ export const AuthProvider = ({ children }) => {
         },
         body: JSON.stringify({ email, password }),
       });
-
+  
+      const data = await response.json();
+  
       if (!response.ok) {
-        throw new Error("Login failed");
+        throw new Error(data.error || "Login failed");
       }
-
-      const result = await response.json();
-      if (result.body.token) {
-        const token = result.body.token;
-        console.log("token is: ", token);
-        localStorage.setItem("token", token);
-        setAuthToken(token);
+  
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("role", data.admin ? "admin" : "user");
+        setAuthToken(data.token);
+        setUserRole(data.admin ? "admin" : "user");
       }
-
+  
     } catch (error) {
       console.error("Login error:", error);
+      throw error;
     }
   };
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('role');
     setAuthToken(null);
+    setUserRole(null);
   };
 
   return (
-    <AuthContext.Provider value={{isLoggedIn, authToken, login, logout }}>
+    <AuthContext.Provider value={{isLoggedIn, authToken, userRole, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

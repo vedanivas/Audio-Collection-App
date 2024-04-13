@@ -4,8 +4,6 @@ import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
 import Link from "@mui/material/Link";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
@@ -24,18 +22,23 @@ const validateEmail = (email) => {
 };
 
 export default function SignIn() {
-  const { isLoggedIn, login } = useAuth();
+  const { isLoggedIn, login, userRole } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isEmailValid, setIsEmailValid] = useState(true);
+  const [isPasswordValid, setIsPasswordValid] = useState(true);
 
   useEffect(() => {
     if (isLoggedIn) {
-      navigate("/user-dashboard");
+      if (userRole === 'admin') {
+        navigate("/admin-dashboard");
+      } else {
+        navigate("/user-dashboard");
+      }
     }
-  }, [isLoggedIn, navigate]);
+  }, [isLoggedIn, userRole, navigate]);
 
   const handleEmailChange = (e) => {
     const emailInput = e.target.value;
@@ -44,10 +47,12 @@ export default function SignIn() {
   };
 
   const handlePasswordChange = (e) => {
-    setPassword(e.target.value);
+    const passwordInput = e.target.value;
+    setPassword(passwordInput);
+    setIsPasswordValid(passwordInput.length >= 6);
   };
 
-  const isSubmitDisabled = !isEmailValid || !email || !password;
+  const isSubmitDisabled = !isEmailValid || !email || !password || !isPasswordValid;
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -115,10 +120,8 @@ export default function SignIn() {
               autoComplete="current-password"
               value={password}
               onChange={handlePasswordChange}
-            />
-            <FormControlLabel
-              control={<Checkbox value="remember" color="primary" />}
-              label="Remember me"
+              error={!isPasswordValid}
+              helperText={!isPasswordValid && "Password must be at least 6 characters long."}
             />
             <Button
               type="submit"
@@ -130,11 +133,6 @@ export default function SignIn() {
               Sign In
             </Button>
             <Grid container>
-              <Grid item xs>
-                <Link href="#" variant="body2">
-                  Forgot password?
-                </Link>
-              </Grid>
               <Grid item>
                 <Link href="/register" variant="body2">
                   {" "}
