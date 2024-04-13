@@ -6,6 +6,10 @@ import {
   AppBar,
   Toolbar,
   IconButton,
+  Box,
+  Paper,
+  useMediaQuery,
+  useTheme
 } from "@mui/material";
 import AudioRecorder from "./AudioRecorder";
 import url from "../url";
@@ -18,6 +22,8 @@ function UserDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { logout } = useAuth();
+  const theme = useTheme();
+  const matches = useMediaQuery(theme.breakpoints.up('sm'));
 
   const ROOT = url();
 
@@ -64,10 +70,7 @@ function UserDashboard() {
 
   return (
     <>
-      <AppBar
-        position="static"
-        style={{ zIndex: 1300, backgroundColor: "blue" }}
-      >
+      <AppBar position="static" style={{ backgroundColor: "#1976d2" }}>
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             User Dashboard
@@ -78,28 +81,30 @@ function UserDashboard() {
         </Toolbar>
       </AppBar>
 
-      <div style={{ textAlign: "center" }}>
-        <Typography variant="h5">Sentence to Record</Typography>
+      <Box sx={{ p: 3 }}>
+        <Typography variant="h5" gutterBottom>
+          Sentence to Record
+        </Typography>
         {sentences.length > 0 ? (
-          <div>
-            <Typography variant="body1" style={{ marginTop: "1rem" }}>
+          <Paper elevation={4} sx={{ p: 2, mt: 2, backgroundColor: matches ? 'rgba(255, 255, 255, 0.8)' : null }}>
+            <Typography variant="body1" sx={{ mb: 2 }}>
               {sentences[currentSentenceIndex]}
             </Typography>
             <AudioRecorder />
             <Button
               variant="contained"
               color="primary"
-              style={{ marginTop: "1rem" }}
+              sx={{ mt: 2 }}
               onClick={handleNextSentence}
               disabled={currentSentenceIndex === sentences.length - 1}
             >
               Next Sentence
             </Button>
-          </div>
+          </Paper>
         ) : (
           <Typography variant="body1">No sentences to display.</Typography>
         )}
-      </div>
+      </Box>
     </>
   );
 }
