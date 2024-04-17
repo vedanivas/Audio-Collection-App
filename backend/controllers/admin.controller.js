@@ -8,7 +8,7 @@ import fs from 'fs';
 
 import * as errors from '../utils/api-error.js';
 import * as response from '../middlewares/response-handler.js';
-import { findAll, uploadTextFileToMinio, updateTexts, checkFileExists } from '../services/admin.service.js';
+import { findAll, uploadTextFileToMinio, updateTexts } from '../services/admin.service.js';
 
 /**
  * @constant {NotFoundError} NotFoundError - not found error object
@@ -46,25 +46,16 @@ const getAllUsers = async (req, res) => {
  */
 const uploadFile = async (req, res) => {
     const file = req.file
-
-    const lines = file.buffer.toString('utf8').split('\n')
-
-    const filename = file.originalname
-    const length = lines.length
-
-    let response = await checkFileExists({filename: filename, 
-                                          toBeRecorded: length, 
-                                          total: length})
-    if (response.status == 'exists' || response.status == 'fail') {
-        return res.status(httpStatus.INTERNAL_SERVER_ERROR).send(responseHandler(response.message))
-    }
-
-    response = await uploadTextFileToMinio(file)
+    
+    const response = await uploadTextFileToMinio(file)
     if (response.status === 'fail') {
         return res.status(httpStatus.INTERNAL_SERVER_ERROR).send(responseHandler(response.message))
     }
+    
+    const lines = file.buffer.toString('utf8').split('\n')
+    
     const rows = []
-    lines.forEach((line) => rows.push({ text: line, filename: filename }))
+    lines.forEach((line) => rows.push({ english: line, telugu: line, hindi: line }))
 
     try {
         await updateTexts(rows)
@@ -77,4 +68,4 @@ const uploadFile = async (req, res) => {
 export {
     getAllUsers,
     uploadFile,
-};
+}

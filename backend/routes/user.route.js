@@ -17,10 +17,10 @@ router
 
 router
     .route('/uploadAudio')
-    .post(auth, upload.single('audio'), uploadAudio)
+    .post(upload.array('audio', 2), uploadAudio)
 
 router
     .route('/fetchSentences')
-    .get(auth, getSentences)
+    .get(getSentences)
 
 export default router;

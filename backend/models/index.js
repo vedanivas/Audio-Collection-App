@@ -30,9 +30,6 @@ Object.keys(db).forEach(modelName => {
 db.User.hasMany(db.Text, { foreignKey: 'phone_number' })
 db.Text.belongsTo(db.User)
 
-db.File.hasMany(db.Text, { foreignKey: 'filename' })
-db.Text.belongsTo(db.File)
-
 db.sequelize = sequelize
 db.Sequelize = Sequelize
 

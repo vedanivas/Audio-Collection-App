@@ -12,7 +12,7 @@ import bufferToStream from '../utils/streamifier.js';
 /*
  * @constant {Sequelize.models} - User model is extracted
  */
-const { User, Text, File } = db.db;
+const { User, Text } = db.db;
 
 /*
  * findAll function to retrieve all available users in system
@@ -56,37 +56,10 @@ const uploadTextFileToMinio = async file => {
  * 
  * @param {object} rows - rows to be added to the table
  */
-const updateTexts = async rows => await Text.bulkCreate(rows);
-
-/*
- * Function to update
- * the files table
- * check if the file
- * exists
- * 
- * @param {object} file - file metadata
- */
-const checkFileExists = async file => {
-    const fileExists = await File.findOne({
-        where: {
-            filename: file.filename
-        }
-    })
-    if (fileExists) {
-        return { status: 'exists', message: 'A file with this name already exists.' }
-    }
-    
-    try {
-        await File.create(file)
-        return { status: 'success', message: 'File succesfully created.' }
-    } catch (error) {
-        return { status: 'fail', message: err }
-    }
-}
+const updateTexts = async rows => await Text.bulkCreate(rows)
 
 export {
     findAll,
     uploadTextFileToMinio,
     updateTexts,
-    checkFileExists,
-};
+}

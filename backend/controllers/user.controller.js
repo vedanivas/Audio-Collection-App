@@ -103,23 +103,23 @@ const login = async (req, res) => {
  * @param {*} res - express HTTP response object
  */
 const uploadAudio = async (req, res) => {
-    const filePath = req.file.path;
-    const file = {
-        path: `uploads/${req.file.filename}.wav`,
-        originalname: req.file.originalname,
-        fileName: req.file.filename,
-    }
-    
-    ffmpeg(filePath)
-    .toFormat('wav')
-    .on('error', (err) => {
-      console.error('An error occurred: ' + err.message);
-      return res.sendStatus(500);
+    const filePaths = req.files
+    console.log(filePaths)
+
+    filePaths.forEach((filePath) => {
+        const file = filePath.path.split('.')[0] + '.wav'
+        const names = file.split('/')
+        const filename = '/'+ names[1] + '/' + names[2]
+        ffmpeg(filePath.path)
+            .toFormat('wav')
+            .on('error', (err) => {
+                console.error('An error occurred: ' + err.message)
+                return res.sendStatus(500)
+            })
+            .on('end', async () => await uploadToMinio({fileName: filename, path: file}))
+            .save(file)
     })
-    .on('end', () => uploadToMinio(file))
-    .save(file.path);
-    
-    res.status(httpStatus.OK).send(responseHandler({ 'message': 'File uploaded successfully' }));
+    res.status(httpStatus.OK).send(responseHandler('Audios uploaded successfully'));
 }
 
 /**
@@ -130,8 +130,13 @@ const uploadAudio = async (req, res) => {
  * @param {*} res - express HTTP response object
  */
 const getSentences = async (req, res) => {
-    const sents = await collectSents()
-    res.status(httpStatus.OK).send(responseHandler(sents))
+    try {
+        const sents = await collectSents()
+        res.status(httpStatus.OK).send(responseHandler(sents))
+    } catch (error) {
+        console.log(error)
+        res.status(httpStatus.INTERNAL_SERVER_ERROR).send(responseHandler(error))
+    }
 }
 
 export {

@@ -36,17 +36,16 @@ const create = async data => await User.create(data);
  * Function to upload file to minio
  * 
  * @param {object} file - file object to be uploaded
- * @returns {Promise} - uploaded file object
+ * @returns {status} - status of file upload
  */
 const uploadToMinio = async file => {
-  const { fileName, path } = file;
-  console.log(file)
-  minioClient.fPutObject('audios', `${fileName}.wav`, path, (err, etag) => {
+  const { fileName, path } = file
+
+  minioClient.fPutObject('audios', fileName, path, (err, etag) => {
     if (err) {
       console.err("Error in uploading file: ", err)
       return { status: 'fail', message: err };
     }
-    console.log("File uploaded successfully")
     return { status: 'success', message: etag };
   });
 }
@@ -54,7 +53,7 @@ const uploadToMinio = async file => {
 /**
  * Function to collect all sentences from the system
  * 
- * @returns {Promise} - List of sentences
+ * @returns {Array} - List of sentences
  */
 const collectSents = async () => {
   try {
@@ -62,10 +61,17 @@ const collectSents = async () => {
       where: {
         recorded: false,
       },
-      attributes: ['text']
+      attributes: ['english', 'telugu', 'hindi']
     })
     
-    return sents.map(sent => sent.text);
+    return sents.map(sent => {
+      return {
+        english: sent.english,
+        telugu: sent.telugu,
+        hindi: sent.hindi,
+        id: sent.id,
+      }
+    })
   } catch (error) {
     console.log("Error in collecting sentences: ", error);
     return []

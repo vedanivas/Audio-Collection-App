@@ -16,7 +16,15 @@ export default (sequelize, DataTypes) => {
         primaryKey: true,
         autoIncrement: true
       },
-      text: {
+      telugu: {
+        type: DataTypes.STRING,
+        allowNull: false
+      },
+      english: {
+        type: DataTypes.STRING,
+        allowNull: false
+      },
+      hindi: {
         type: DataTypes.STRING,
         allowNull: false
       },
@@ -31,10 +39,6 @@ export default (sequelize, DataTypes) => {
         validate: {
           len: [10]  
         }
-      },
-      filename: {
-        type: DataTypes.STRING,
-        allowNull: false
       },
       createdAt: DataTypes.DATE,
       updatedAt: DataTypes.DATE,
