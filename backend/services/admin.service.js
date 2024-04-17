@@ -1,4 +1,4 @@
-/**
+/*
  * User service which serves DB operations
  * required by the user controller
  *
@@ -9,19 +9,19 @@ import minioClient from '../configs/minio.js';
 
 import bufferToStream from '../utils/streamifier.js';
 
-/**
+/*
  * @constant {Sequelize.models} - User model is extracted
  */
-const { User, Text } = db.db;
+const { User, Text, File } = db.db;
 
-/**
+/*
  * findAll function to retrieve all available users in system
  *
  * @returns {Promise} User object array
  */
 const findAll = async () => User.findAll();
 
-/**
+/*
  * Function to upload text 
  * file to minio
  * 
@@ -50,7 +50,7 @@ const uploadTextFileToMinio = async file => {
     })
 }
 
-/**
+/*
  * Function to update
  * the table in mysql
  * 
@@ -58,8 +58,35 @@ const uploadTextFileToMinio = async file => {
  */
 const updateTexts = async rows => await Text.bulkCreate(rows);
 
+/*
+ * Function to update
+ * the files table
+ * check if the file
+ * exists
+ * 
+ * @param {object} file - file metadata
+ */
+const checkFileExists = async file => {
+    const fileExists = await File.findOne({
+        where: {
+            filename: file.filename
+        }
+    })
+    if (fileExists) {
+        return { status: 'exists', message: 'A file with this name already exists.' }
+    }
+    
+    try {
+        await File.create(file)
+        return { status: 'success', message: 'File succesfully created.' }
+    } catch (error) {
+        return { status: 'fail', message: err }
+    }
+}
+
 export {
     findAll,
     uploadTextFileToMinio,
-    updateTexts
+    updateTexts,
+    checkFileExists,
 };

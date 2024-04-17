@@ -16,6 +16,33 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+-- Table structure for table `files`
+--
+
+DROP TABLE IF EXISTS `files`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `files` (
+  `filename` varchar(255) COLLATE utf8mb3_unicode_ci NOT NULL,
+  `to_be_recorded` int NOT NULL,
+  `total` varchar(255) COLLATE utf8mb3_unicode_ci NOT NULL,
+  `language` varchar(255) COLLATE utf8mb3_unicode_ci NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`filename`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `files`
+--
+
+LOCK TABLES `files` WRITE;
+/*!40000 ALTER TABLE `files` DISABLE KEYS */;
+/*!40000 ALTER TABLE `files` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `texts`
 --
 
@@ -24,16 +51,16 @@ DROP TABLE IF EXISTS `texts`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `texts` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `recorded` tinyint(1) DEFAULT NULL,
-  `text` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `user` varchar(255) DEFAULT NULL,
-  `phone_number` varchar(255) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `text` varchar(255) COLLATE utf8mb3_unicode_ci NOT NULL,
+  `recorded` tinyint DEFAULT '0',
+  `user` varchar(255) COLLATE utf8mb3_unicode_ci DEFAULT NULL,
+  `filename` varchar(255) COLLATE utf8mb3_unicode_ci NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `user` (`user`),
-  CONSTRAINT `texts_ibfk_1` FOREIGN KEY (`user`) REFERENCES `users` (`phone_number`)
-) ENGINE=InnoDB AUTO_INCREMENT=3076 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  KEY `filename` (`filename`),
+  CONSTRAINT `texts_ibfk_1` FOREIGN KEY (`filename`) REFERENCES `files` (`filename`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -60,6 +87,7 @@ CREATE TABLE `users` (
   `fname` varchar(255) NOT NULL,
   `lname` varchar(255) NOT NULL,
   `gender` enum('Male','Female','Other') DEFAULT NULL,
+  `admin` tinyint(1) DEFAULT '0',
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`phone_number`),
@@ -74,7 +102,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES ('1234567891','abc@gmail.com',22,'admin','Admin','Admin','Male','2024-03-03 22:48:56','2024-03-03 22:48:56'),('9012345678','laaa@grep.com',43,'know','j','s','Female','2024-03-03 23:24:52','2024-03-03 23:24:52'),('9876543210','lad@yahoo.com',33,'donotknow','junior','senior','Male','2024-03-03 22:51:14','2024-03-03 22:51:14'),('9999999999','alaa@repd.com',54,'ow','s','d','Other','2024-03-07 22:22:47','2024-03-07 22:22:47');
+INSERT INTO `users` VALUES ('9876543210','user1@user.com',21,'$2a$10$YKNQYSPuuAyU2TqYbV5Hnu2m2gGPMWs8Y5AfqG2RF3mL0jT4aeRFC','User1','User','Male',0,'2024-04-12 17:05:31','2024-04-12 17:05:31'),('9999999999','admin1@admin.com',40,'$2a$10$zHARkDimjG6Pv621JV1U.u8AHOmMJzj8nmZ7Sea1dGRziqBnUsDlu','Admin1 ','Admin','Male',1,'2024-04-17 12:46:26','2024-04-17 12:46:26');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -86,3 +114,5 @@ UNLOCK TABLES;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2024-04-17 18:19:27
