@@ -3,10 +3,11 @@ import multer from 'multer'
 // Setup storage engine
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads'); // ensure this directory exists
+    cb(null, 'temp'); // ensure this directory exists
   },
   filename: (req, file, cb) => {
-    cb(null, new Date().toISOString().replace(/:/g, '-') + '-' + file.originalname);
+    const name = file.originalname.split(/[.-]/);
+    cb(null, `${name[1]}/${name[0]}.${name[2]}`);
   },
 });
 
