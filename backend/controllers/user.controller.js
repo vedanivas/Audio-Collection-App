@@ -33,12 +33,25 @@ const responseHandler = response.default;
  * @param {*} res - express HTTP response object
  */
 const addUser = async (req, res) => {
-    const details = req.body
-    const salt = await bcrypt.genSalt(process.env.SALT_ROUNDS)
-    details.password = await bcrypt.hash(details.password, salt)
-    const userDetails = await create(details)
-    res.status(httpStatus.CREATED).send(responseHandler(userDetails))
+    const details = req.body;
+    const salt = await bcrypt.genSalt(process.env.SALT_ROUNDS);
+    details.password = await bcrypt.hash(details.password, salt);
+    try {
+        const userDetails = await create(details);
+        res.status(httpStatus.CREATED).send(responseHandler(userDetails));
+    } catch (error) {
+        if (error.name === 'SequelizeUniqueConstraintError') {
+            const errorMessage = error.errors[0].path === 'email' 
+                                 ? "Email already in use." 
+                                 : "Phone number already in use.";
+            res.status(409).send({ error: errorMessage });
+        } else {
+            res.status(500).send({ error: "Internal server error." });
+        }
+    }
 };
+
+
 
 /**
  * Function which provides functionality
@@ -51,34 +64,35 @@ const addUser = async (req, res) => {
  * @throws {NotFoundError} - if no such user exists for provided userId
  */
 const login = async (req, res) => {
-    const { email, password } = req.body
+    const { email, password } = req.body;
 
-    const user = await findByMail(email)
+    try {
+        const user = await findByMail(email);
+        
+        if (!user) {
+            return res.status(404).json({ error: 'Invalid email or password. Please try again.' });
+        }
 
-    if (!user) {
-        throw new NotFoundError('Invalid email or password. Please try again.')
+        const check = await bcrypt.compare(password, user.password);
+        if (!check) {
+            return res.status(401).json({ error: 'Invalid email or password. Please try again.' });
+        }
+
+        const payload = {
+            user: {
+                id: user.email,
+                admin: user.admin,
+            },
+        };
+          
+        const token = generateAccessToken(payload);
+        res.status(200).send({ token: token, admin: user.admin });
+    } catch (error) {
+        console.error("Login error:", error);
+        res.status(500).json({ error: 'Internal server error.' });
     }
-
-    const check = await bcrypt.compare(password, user.password)
-
-    if (!check) {
-        throw new NotFoundError('Invalid email or password. Please try again.')
-    }
-
-    const payload = {
-        user: {
-            id: user.email,
-            admin: user.admin,
-        },
-    };
-
-    const token = generateAccessToken(payload);
-    if (!token) {
-        throw new NotFoundError('Token not generated');
-    }
-
-    res.status(httpStatus.OK).send(responseHandler({ 'token': token, 'admin': user.admin }));
 };
+
 
 /**
  * Function which provides functionality
