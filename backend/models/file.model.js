@@ -28,7 +28,7 @@ export default (sequelize, DataTypes) => {
       language: {
         type: DataTypes.STRING,
         allowNull: false,
-        default: 'Telugu'
+        defaultValue: 'Telugu'
       },
       createdAt: DataTypes.DATE,
       updatedAt: DataTypes.DATE,
