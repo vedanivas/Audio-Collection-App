@@ -1,37 +1,41 @@
 /* eslint no-underscore-dangle: 0 */
 
-import fs from 'fs';
-import { join, dirname, basename } from 'path';
-import { fileURLToPath } from 'url';
-import { Sequelize, DataTypes } from 'sequelize';
+import fs from 'fs'
+import { join, dirname, basename } from 'path'
+import { fileURLToPath } from 'url'
+import { Sequelize, DataTypes } from 'sequelize'
 
-import sequelize from '../configs/sequelize.js';
+import sequelize from '../configs/sequelize.js'
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const base = basename(__filename);
-const db = {};
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
+const base = basename(__filename)
+const db = {}
 
 const files = fs
   .readdirSync(__dirname)
-  .filter(file => (file.indexOf('.') !== 0) && (file !== base) && (file.slice(-3) === '.js'));
+  .filter(file => (file.indexOf('.') !== 0) && (file !== base) && (file.slice(-3) === '.js'))
 
 await Promise.all(files.map(async file => {
-  const model = (await import(join(__dirname, file))).default(sequelize, DataTypes);
+  const model = (await import(join(__dirname, file))).default(sequelize, DataTypes)
   db[model.name] = model;
-}));
+}))
 
 Object.keys(db).forEach(modelName => {
   if (db[modelName].associate) {
-    db[modelName].associate(db);
+    db[modelName].associate(db)
   }
-});
+})
 
-db.User.hasMany(db.Text, { foreignKey: 'phone_number' });
-db.Text.belongsTo(db.User);
-db.sequelize = sequelize;
-db.Sequelize = Sequelize;
+db.User.hasMany(db.Text, { foreignKey: 'phone_number' })
+db.Text.belongsTo(db.User)
+
+db.File.hasMany(db.Text, { foreignKey: 'filename' })
+db.Text.belongsTo(db.File)
+
+db.sequelize = sequelize
+db.Sequelize = Sequelize
 
 export default {
   db,
-};
+}

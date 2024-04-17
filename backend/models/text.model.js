@@ -32,6 +32,10 @@ export default (sequelize, DataTypes) => {
           len: [10]  
         }
       },
+      filename: {
+        type: DataTypes.STRING,
+        allowNull: false
+      },
       createdAt: DataTypes.DATE,
       updatedAt: DataTypes.DATE,
     }, {
@@ -39,10 +43,10 @@ export default (sequelize, DataTypes) => {
       underscored: true,
       charset: 'utf8',
       collate: 'utf8_unicode_ci',
-    });
+    })
     
     Text.sync().then(() => console.log('Text table created/exists'))
 
     return Text;
-  };
+  }
   
