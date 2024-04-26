@@ -8,7 +8,7 @@ import fs from 'fs';
 
 import * as errors from '../utils/api-error.js';
 import * as response from '../middlewares/response-handler.js';
-import { findAll, uploadTextFileToMinio, updateTexts } from '../services/admin.service.js';
+import { findAll, uploadTextFileToMinio, updateTexts, deleteAudioFromMinio, resetText, deleteTextFromMySQL } from '../services/admin.service.js';
 
 /**
  * @constant {NotFoundError} NotFoundError - not found error object
@@ -26,15 +26,9 @@ const responseHandler = response.default;
  * @param {*} req - express HTTP request object
  * @param {*} res - express HTTP response object
  */
-const getAllUsers = async (req, res) => {
-    const users = await findAll();
-    let data = users.map((user) => user.dataValues);
-    let newss = data[0];
-    console.log(newss.phone_number, typeof newss.phone_number);
-    if (newss.phone_number === "1234567891") {
-        console.log('yes');
-    }
-    res.status(httpStatus.OK).send(responseHandler(users));
+const getAllData = async (req, res) => {
+    const data = await findAll();
+    res.status(httpStatus.OK).send(responseHandler(data));
 }
 
 /**
@@ -47,10 +41,10 @@ const getAllUsers = async (req, res) => {
 const uploadFile = async (req, res) => {
     const file = req.file
     
-    const response = await uploadTextFileToMinio(file)
-    if (response.status === 'fail') {
-        return res.status(httpStatus.INTERNAL_SERVER_ERROR).send(responseHandler(response.message))
-    }
+    // const response = await uploadTextFileToMinio(file)
+    // if (response.status === 'fail') {
+    //     return res.status(httpStatus.INTERNAL_SERVER_ERROR).send(responseHandler(response.message))
+    // }
     
     const lines = file.buffer.toString('utf8').split('\n')
     
@@ -65,7 +59,64 @@ const uploadFile = async (req, res) => {
     }
 }
 
+/**
+ * Function which provides functionality
+ * to delete audio file
+ * 
+ * @param {*} req - express HTTP request object
+ * @param {*} res - express HTTP response object
+ */
+const deleteAudio = async (req, res) => {
+    const ids = req.body.ids
+    
+    let flag = true
+    ids.forEach(async id => {
+        const fileName = `${id}.wav`
+        let response = await resetText(id)
+        if (response.status === 'fail') {
+            flag = false
+            return res.status(httpStatus.INTERNAL_SERVER_ERROR).send(responseHandler(response.message))
+        }
+
+        response = await deleteAudioFromMinio(fileName)
+        if (response.status === 'fail') {
+            flag = false
+            return res.status(httpStatus.INTERNAL_SERVER_ERROR).send(responseHandler(response.message))
+        }
+    })
+
+    if (flag) {
+        return res.status(httpStatus.OK).send(responseHandler("Audios deleted successfully"))
+    }
+}
+
+/**
+ * Function which provides functionality
+ * to delete a text
+ * 
+ * @param {*} req - express HTTP request object
+ * @param {*} res - express HTTP response object
+ */
+const deleteText = async (req, res) => {
+    const ids = req.body.ids
+
+    let flag = true
+    ids.forEach(async id => {
+        const response = await deleteTextFromMySQL(id)
+        if (response.status === 'fail') {
+            flag = false
+            return res.status(httpStatus.INTERNAL_SERVER_ERROR).send(responseHandler(response.message))
+        }
+    })
+
+    if (flag) {
+        return res.status(httpStatus.OK).send(responseHandler("Texts reset successfully"))
+    }
+}
+
 export {
-    getAllUsers,
+    getAllData,
     uploadFile,
+    deleteAudio,
+    deleteText,
 }

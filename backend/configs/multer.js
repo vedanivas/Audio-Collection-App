@@ -6,8 +6,10 @@ const storage = multer.diskStorage({
     cb(null, 'temp'); // ensure this directory exists
   },
   filename: (req, file, cb) => {
-    const name = file.originalname.split(/[.-]/);
-    cb(null, `${name[1]}/${name[0]}.${name[2]}`);
+    const id = file.originalname.slice(0, 36)
+    const fileName = file.originalname.slice(37) 
+    const name = fileName.split('.')
+    cb(null, `${name[0]}/${id}.${name[1]}`)
   },
 });
 

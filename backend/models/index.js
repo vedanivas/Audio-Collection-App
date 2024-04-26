@@ -27,7 +27,7 @@ Object.keys(db).forEach(modelName => {
   }
 })
 
-db.User.hasMany(db.Text, { foreignKey: 'phone_number' })
+db.User.hasMany(db.Text, { foreignKey: 'user_phone_number' })
 db.Text.belongsTo(db.User)
 
 db.sequelize = sequelize

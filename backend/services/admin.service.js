@@ -19,7 +19,7 @@ const { User, Text } = db.db;
  *
  * @returns {Promise} User object array
  */
-const findAll = async () => User.findAll();
+const findAll = async () => Text.findAll();
 
 /*
  * Function to upload text 
@@ -58,8 +58,66 @@ const uploadTextFileToMinio = async file => {
  */
 const updateTexts = async rows => await Text.bulkCreate(rows)
 
+/**
+ * Function to delete audio
+ * from minio
+ * 
+ * @param {string} id - id of the audio file
+ * @returns {string} - success message
+ */
+const deleteAudioFromMinio = async id => {
+    try {
+        await minioClient.removeObject('audios', `eng/${id}`)
+        await minioClient.removeObject('audios', `hin/${id}`)
+        await minioClient.removeObject('audios', `tel/${id}`)
+        
+        return ({ status: 'success', message: 'Audio deleted successfully' })
+    } catch (error) {
+        return ({ status: 'fail', message: error.message })
+    }
+}
+
+/**
+ * Function to reset text
+ * from mysql
+ * 
+ * @param {string} id - id of the text
+ * @returns {string} - success message
+ */
+const resetText = async id => {
+    try {
+        await Text.update({ recorded: 0, user_phone_number: null }, { where: { id } })
+        return ({ status: 'success', message: 'Text reset successfully' })
+    } catch (error) {
+        return ({ status: 'fail', message: error.message })
+    }
+}
+
+/**
+ * Function to delete text
+ * from mysql
+ * 
+ * @param {string} id - id of the text
+ * @returns {string} - success message
+ */
+const deleteTextFromMySQL = async id => {
+    try {
+        await Text.destroy({ 
+            where: { 
+                id: id 
+            } 
+        })
+        return ({ status: 'success', message: 'Text deleted successfully' })
+    } catch (error) {
+        return ({ status: 'fail', message: error.message })
+    }
+}
+
 export {
     findAll,
     uploadTextFileToMinio,
     updateTexts,
+    deleteAudioFromMinio,
+    resetText,
+    deleteTextFromMySQL,
 }
