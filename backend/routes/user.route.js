@@ -17,7 +17,7 @@ router
 
 router
     .route('/uploadAudio')
-    .post(upload.array('audio', 2), uploadAudio)
+    .post(upload.array('audio', 3), uploadAudio)
 
 router
     .route('/fetchSentences')

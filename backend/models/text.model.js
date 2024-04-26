@@ -33,7 +33,7 @@ export default (sequelize, DataTypes) => {
         allowNull: true,
         defaultValue: 0
       },
-      user: {
+      user_phone_number: {
         type: DataTypes.STRING,
         allowNull: true,
         validate: {
